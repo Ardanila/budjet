@@ -1,5 +1,5 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { CssBaseline, Box } from '@mui/material';
+import { CssBaseline, Box, Typography } from '@mui/material';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import { createContext, useState, useEffect } from 'react';
 import { BudgetItem, BudgetContextType } from './types/budget';
@@ -42,14 +42,22 @@ function App() {
   const [plannedItems, setPlannedItems] = useState<BudgetItem[]>([]);
   const [actualItems, setActualItems] = useState<BudgetItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   // Загрузка данных при старте
   useEffect(() => {
     const loadData = async () => {
-      const data = await getBudgetData();
-      setPlannedItems(data.plannedBudget);
-      setActualItems(data.actualBudget);
-      setIsLoading(false);
+      try {
+        setError(null);
+        const data = await getBudgetData();
+        setPlannedItems(data.plannedBudget);
+        setActualItems(data.actualBudget);
+      } catch (err) {
+        setError('Ошибка загрузки данных');
+        console.error('Error loading data:', err);
+      } finally {
+        setIsLoading(false);
+      }
     };
     loadData();
   }, []);
@@ -57,7 +65,15 @@ function App() {
   // Сохранение данных при изменении
   useEffect(() => {
     if (!isLoading) {
-      setBudgetData(plannedItems, actualItems, '0');
+      const saveData = async () => {
+        try {
+          await setBudgetData(plannedItems, actualItems, '0');
+        } catch (err) {
+          console.error('Error saving data:', err);
+          // Можно добавить уведомление пользователю об ошибке сохранения
+        }
+      };
+      saveData();
     }
   }, [plannedItems, actualItems, isLoading]);
 
@@ -68,7 +84,15 @@ function App() {
   if (isLoading) {
     return (
       <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
-        Загрузка...
+        <Typography variant="h6">Загрузка...</Typography>
+      </Box>
+    );
+  }
+
+  if (error) {
+    return (
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+        <Typography variant="h6" color="error">{error}</Typography>
       </Box>
     );
   }

@@ -5,10 +5,14 @@ const API_URL = import.meta.env.PROD ? '/api/budget' : 'http://localhost:3000/ap
 export const getBudgetData = async () => {
   try {
     const response = await fetch(API_URL);
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
     const data = await response.json();
+    console.log('Received data:', data); // Отладочный вывод
     return {
-      plannedBudget: data?.plannedBudget || [],
-      actualBudget: data?.actualBudget || [],
+      plannedBudget: Array.isArray(data?.plannedBudget) ? data.plannedBudget : [],
+      actualBudget: Array.isArray(data?.actualBudget) ? data.actualBudget : [],
       initialAmount: data?.initialAmount || '0'
     };
   } catch (error) {
@@ -27,6 +31,7 @@ export const setBudgetData = async (
   initialAmount: string
 ) => {
   try {
+    console.log('Sending data:', { plannedBudget, actualBudget, initialAmount }); // Отладочный вывод
     const response = await fetch(API_URL, {
       method: 'POST',
       headers: {
@@ -38,6 +43,9 @@ export const setBudgetData = async (
         initialAmount
       })
     });
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
     const data = await response.json();
     return data.success;
   } catch (error) {
