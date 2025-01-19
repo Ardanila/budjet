@@ -6,7 +6,6 @@ import ReceiptIcon from '@mui/icons-material/Receipt';
 import CompareIcon from '@mui/icons-material/Compare';
 import PersonIcon from '@mui/icons-material/Person';
 import LoginIcon from '@mui/icons-material/Login';
-import { getCurrentUser } from '../data/storage';
 import { isAuthenticated } from '../data/auth';
 
 const Navigation = () => {
@@ -14,7 +13,6 @@ const Navigation = () => {
   const location = useLocation();
   const theme = useTheme();
   const isAuth = isAuthenticated();
-  const user = getCurrentUser();
 
   return (
     <AppBar 

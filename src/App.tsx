@@ -8,7 +8,6 @@ import {
   setPlannedBudget,
   getActualBudget,
   setActualBudget,
-  getCurrentUser,
 } from './data/storage';
 import { isAuthenticated } from './data/auth';
 
