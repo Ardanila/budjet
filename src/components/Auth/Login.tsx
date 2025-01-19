@@ -7,11 +7,8 @@ import Alert from '@mui/material/Alert';
 import { useNavigate } from 'react-router-dom';
 import LoginIcon from '@mui/icons-material/Login';
 import { useTheme, Paper } from '@mui/material';
-
-interface User {
-  login: string;
-  password: string;
-}
+import { AUTH_CONFIG } from '../../data/config';
+import { setAuthenticated } from '../../data/storage';
 
 const Login = () => {
   const [login, setLogin] = useState('');
@@ -23,54 +20,17 @@ const Login = () => {
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setError('');
-    console.log('Начало процесса входа');
-    console.log('Введенные данные:', { login, password });
 
     if (!login || !password) {
-      console.log('Ошибка: пустые поля');
       setError('Пожалуйста, заполните все поля');
       return;
     }
 
-    try {
-      const usersRaw = localStorage.getItem('users');
-      console.log('Данные из localStorage (raw):', usersRaw);
-      
-      const users = JSON.parse(usersRaw || '[]');
-      console.log('Распарсенные пользователи:', users);
-
-      if (!Array.isArray(users)) {
-        console.error('Ошибка: данные пользователей не являются массивом');
-        setError('Ошибка в данных пользователей');
-        return;
-      }
-
-      const user = users.find((u: User) => {
-        console.log('Сравнение с пользователем:', {
-          storedLogin: u.login,
-          storedPassword: u.password,
-          inputLogin: login,
-          inputPassword: password,
-          loginMatch: u.login === login,
-          passwordMatch: u.password === password
-        });
-        return u.login === login && u.password === password;
-      });
-      
-      console.log('Найденный пользователь:', user);
-
-      if (!user) {
-        console.log('Пользователь не найден');
-        setError('Неверный логин или пароль');
-        return;
-      }
-
-      localStorage.setItem('currentUser', JSON.stringify(user));
-      console.log('Пользователь успешно вошел в систему:', user);
+    if (login === AUTH_CONFIG.login && password === AUTH_CONFIG.password) {
+      setAuthenticated(true);
       navigate('/initial');
-    } catch (err) {
-      console.error('Ошибка при входе:', err);
-      setError('Произошла ошибка при входе');
+    } else {
+      setError('Неверный логин или пароль');
     }
   };
 
