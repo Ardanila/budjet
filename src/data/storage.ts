@@ -1,87 +1,67 @@
 import { BudgetItem } from '../types/budget';
-import fs from 'fs';
-import { DATA_PATH } from './config';
 
-interface BudgetData {
-    initialAmount: string;
-    plannedBudget: BudgetItem[];
-    actualBudget: BudgetItem[];
-}
-
-const defaultData: BudgetData = {
-    initialAmount: '0',
-    plannedBudget: [],
-    actualBudget: []
-};
-
-// Функции для работы с данными в sessionStorage
-const isAuthenticated = (): boolean => {
-    return sessionStorage.getItem('isAuthenticated') === 'true';
-};
-
-const setAuthenticated = (value: boolean): void => {
-    sessionStorage.setItem('isAuthenticated', String(value));
-};
+// Ключи для localStorage
+const STORAGE_KEYS = {
+  INITIAL_AMOUNT: 'initialAmount',
+  PLANNED_BUDGET: 'plannedBudget',
+  ACTUAL_BUDGET: 'actualBudget',
+  CURRENT_USER: 'currentUser',
+} as const;
 
 // Функции для работы с начальной суммой
 export const getInitialAmount = (): string => {
-    return defaultData.initialAmount;
+  return localStorage.getItem(STORAGE_KEYS.INITIAL_AMOUNT) || '0';
 };
 
 export const setInitialAmount = (amount: string): void => {
-    defaultData.initialAmount = amount;
+  localStorage.setItem(STORAGE_KEYS.INITIAL_AMOUNT, amount);
 };
 
 // Функции для работы с планируемым бюджетом
 export const getPlannedBudget = (): BudgetItem[] => {
-    return defaultData.plannedBudget;
+  try {
+    const items = localStorage.getItem(STORAGE_KEYS.PLANNED_BUDGET);
+    return items ? JSON.parse(items) : [];
+  } catch (e) {
+    console.error('Error parsing plannedBudget:', e);
+    return [];
+  }
 };
 
 export const setPlannedBudget = (items: BudgetItem[]): void => {
-    defaultData.plannedBudget = items;
+  localStorage.setItem(STORAGE_KEYS.PLANNED_BUDGET, JSON.stringify(items));
 };
 
 // Функции для работы с фактическим бюджетом
 export const getActualBudget = (): BudgetItem[] => {
-    return defaultData.actualBudget;
+  try {
+    const items = localStorage.getItem(STORAGE_KEYS.ACTUAL_BUDGET);
+    return items ? JSON.parse(items) : [];
+  } catch (e) {
+    console.error('Error parsing actualBudget:', e);
+    return [];
+  }
 };
 
 export const setActualBudget = (items: BudgetItem[]): void => {
-    defaultData.actualBudget = items;
+  localStorage.setItem(STORAGE_KEYS.ACTUAL_BUDGET, JSON.stringify(items));
+};
+
+// Функции для работы с данными пользователя
+export const getCurrentUser = () => {
+  try {
+    return JSON.parse(localStorage.getItem(STORAGE_KEYS.CURRENT_USER) || 'null');
+  } catch (e) {
+    console.error('Error parsing currentUser:', e);
+    return null;
+  }
+};
+
+export const setCurrentUser = (user: any): void => {
+  localStorage.setItem(STORAGE_KEYS.CURRENT_USER, JSON.stringify(user));
 };
 
 // Функция для очистки всех данных
 export const clearAllData = (): void => {
-    defaultData.initialAmount = '0';
-    defaultData.plannedBudget = [];
-    defaultData.actualBudget = [];
-};
-
-export { isAuthenticated, setAuthenticated };
-
-export const readData = (): BudgetData => {
-    try {
-        if (!fs.existsSync(DATA_PATH)) {
-            const initialData: BudgetData = {
-                initialAmount: '0',
-                plannedBudget: [],
-                actualBudget: []
-            };
-            fs.writeFileSync(DATA_PATH, JSON.stringify(initialData, null, 2));
-            return initialData;
-        }
-        const data = fs.readFileSync(DATA_PATH, 'utf-8');
-        return JSON.parse(data);
-    } catch (error) {
-        console.error('Error reading data:', error);
-        return { initialAmount: '0', plannedBudget: [], actualBudget: [] };
-    }
-};
-
-export const writeData = (data: BudgetData): void => {
-    try {
-        fs.writeFileSync(DATA_PATH, JSON.stringify(data, null, 2));
-    } catch (error) {
-        console.error('Error writing data:', error);
-    }
+  Object.values(STORAGE_KEYS).forEach(key => localStorage.removeItem(key));
 }; 

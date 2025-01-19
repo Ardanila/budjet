@@ -15,7 +15,7 @@ import { useNavigate } from 'react-router-dom';
 import PersonIcon from '@mui/icons-material/Person';
 import SaveIcon from '@mui/icons-material/Save';
 import LogoutIcon from '@mui/icons-material/Logout';
-import { AUTH_CONFIG } from '../data/config';
+import { checkCredentials, clearAuth } from '../data/auth';
 
 const Profile = () => {
   const [formData, setFormData] = useState({
@@ -29,7 +29,7 @@ const Profile = () => {
   const theme = useTheme();
 
   const handleLogout = () => {
-    sessionStorage.removeItem('isAuthenticated');
+    clearAuth();
     navigate('/login');
   };
 
@@ -43,7 +43,7 @@ const Profile = () => {
       return;
     }
 
-    if (formData.currentPassword !== AUTH_CONFIG.password) {
+    if (!checkCredentials(process.env.REACT_APP_LOGIN || '', formData.currentPassword)) {
       setError('Неверный текущий пароль');
       return;
     }
@@ -58,9 +58,7 @@ const Profile = () => {
       return;
     }
 
-    // В данном случае мы не можем изменить пароль, так как он хранится в env
-    setError('Изменение пароля недоступно. Пароль установлен в переменных окружения.');
-
+    setError('Изменение пароля не поддерживается в данной версии');
     setFormData({
       currentPassword: '',
       newPassword: '',
@@ -101,7 +99,7 @@ const Profile = () => {
             Личный кабинет
           </Typography>
           <Typography variant="body1" color="text.secondary" sx={{ mb: 2 }}>
-            Логин: {AUTH_CONFIG.login}
+            Логин: {process.env.REACT_APP_LOGIN}
           </Typography>
         </Box>
 
