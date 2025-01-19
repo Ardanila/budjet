@@ -45,9 +45,18 @@ export const BudgetContext = createContext<BudgetContextType>({
 });
 
 function App() {
-  const isAuth = isAuthenticated();
+  const [isAuth, setIsAuth] = useState(isAuthenticated());
   const [plannedItems, setPlannedItems] = useState<BudgetItem[]>(() => getPlannedBudget());
   const [actualItems, setActualItems] = useState<BudgetItem[]>(() => getActualBudget());
+
+  useEffect(() => {
+    const checkAuth = () => {
+      setIsAuth(isAuthenticated());
+    };
+    
+    window.addEventListener('storage', checkAuth);
+    return () => window.removeEventListener('storage', checkAuth);
+  }, []);
 
   useEffect(() => {
     setPlannedBudget(plannedItems);

@@ -7,12 +7,23 @@ import CompareIcon from '@mui/icons-material/Compare';
 import PersonIcon from '@mui/icons-material/Person';
 import LoginIcon from '@mui/icons-material/Login';
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
+import { isAuthenticated } from '../data/auth';
+import { useState, useEffect } from 'react';
 
 const Navigation = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const theme = useTheme();
-  const user = JSON.parse(localStorage.getItem('currentUser') || 'null');
+  const [isAuth, setIsAuth] = useState(isAuthenticated());
+
+  useEffect(() => {
+    const checkAuth = () => {
+      setIsAuth(isAuthenticated());
+    };
+    
+    window.addEventListener('storage', checkAuth);
+    return () => window.removeEventListener('storage', checkAuth);
+  }, []);
 
   return (
     <AppBar 
@@ -48,7 +59,7 @@ const Navigation = () => {
           Бюджет
         </Typography>
         
-        {user ? (
+        {isAuth ? (
           <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
             <Button
               startIcon={<TimelineIcon />}

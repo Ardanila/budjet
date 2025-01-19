@@ -31,6 +31,7 @@ const Login = () => {
 
     if (checkCredentials(formData.login, formData.password)) {
       setAuthenticated(true);
+      window.dispatchEvent(new Event('storage'));
       navigate('/initial');
     } else {
       setError('Неверный логин или пароль');
