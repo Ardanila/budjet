@@ -20,7 +20,7 @@ const Login = () => {
   const navigate = useNavigate();
   const theme = useTheme();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
 
@@ -31,7 +31,7 @@ const Login = () => {
 
     if (checkCredentials(formData.login, formData.password)) {
       setAuthenticated(true);
-      navigate('/profile');
+      navigate('/initial');
     } else {
       setError('Неверный логин или пароль');
     }
