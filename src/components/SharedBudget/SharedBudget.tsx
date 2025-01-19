@@ -20,6 +20,7 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import AddIcon from '@mui/icons-material/Add';
 import GroupAddIcon from '@mui/icons-material/GroupAdd';
 import PersonIcon from '@mui/icons-material/Person';
+import { getCurrentUser } from '../../data/storage';
 
 interface User {
   email: string;
@@ -43,17 +44,17 @@ const SharedBudget = () => {
   const [error, setError] = useState('');
   const theme = useTheme();
 
-  const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
+  const currentUser = getCurrentUser();
 
   useEffect(() => {
-    const savedBudgets = localStorage.getItem('sharedBudgets');
+    const savedBudgets = sessionStorage.getItem('sharedBudgets');
     if (savedBudgets) {
       setBudgets(JSON.parse(savedBudgets));
     }
   }, []);
 
   useEffect(() => {
-    localStorage.setItem('sharedBudgets', JSON.stringify(budgets));
+    sessionStorage.setItem('sharedBudgets', JSON.stringify(budgets));
   }, [budgets]);
 
   const handleCreateBudget = () => {
@@ -82,7 +83,7 @@ const SharedBudget = () => {
       return;
     }
 
-    const users = JSON.parse(localStorage.getItem('users') || '[]');
+    const users = JSON.parse(sessionStorage.getItem('users') || '[]');
     const newMember = users.find((user: User) => user.email === newMemberEmail);
 
     if (!newMember) {

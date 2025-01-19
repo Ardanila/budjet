@@ -10,6 +10,7 @@ import {
   setActualBudget,
   getCurrentUser,
 } from './data/storage';
+import { isAuthenticated } from './data/auth';
 
 import Navigation from './components/Navigation';
 import Login from './components/Auth/Login';
@@ -44,7 +45,6 @@ export const BudgetContext = createContext<BudgetContextType>({
 });
 
 function App() {
-  const user = getCurrentUser();
   const [plannedItems, setPlannedItems] = useState<BudgetItem[]>(() => getPlannedBudget());
   const [actualItems, setActualItems] = useState<BudgetItem[]>(() => getActualBudget());
 
@@ -57,7 +57,7 @@ function App() {
   }, [actualItems]);
 
   const PrivateRoute = ({ children }: { children: React.ReactNode }) => {
-    return user ? <>{children}</> : <Navigate to="/login" replace />;
+    return isAuthenticated() ? <>{children}</> : <Navigate to="/login" replace />;
   };
 
   return (
@@ -69,14 +69,14 @@ function App() {
             <Navigation />
             <Box sx={{ flex: 1, p: 3 }}>
               <Routes>
-                <Route path="/login" element={!user ? <Login /> : <Navigate to="/initial" replace />} />
+                <Route path="/login" element={!isAuthenticated() ? <Login /> : <Navigate to="/initial" replace />} />
                 <Route path="/initial" element={<PrivateRoute><InitialSetup /></PrivateRoute>} />
                 <Route path="/planned" element={<PrivateRoute><PlannedBudget /></PrivateRoute>} />
                 <Route path="/actual" element={<PrivateRoute><ActualBudget /></PrivateRoute>} />
                 <Route path="/comparison" element={<PrivateRoute><BudgetComparison /></PrivateRoute>} />
                 <Route path="/shared" element={<PrivateRoute><SharedBudget /></PrivateRoute>} />
                 <Route path="/profile" element={<PrivateRoute><Profile /></PrivateRoute>} />
-                <Route path="/" element={<Navigate to={user ? "/initial" : "/login"} replace />} />
+                <Route path="/" element={<Navigate to={isAuthenticated() ? "/initial" : "/login"} replace />} />
               </Routes>
             </Box>
           </Box>

@@ -33,6 +33,7 @@ import isBetween from 'dayjs/plugin/isBetween';
 import 'dayjs/locale/ru';
 import InfoIcon from '@mui/icons-material/Info';
 import { BudgetContext } from '../App';
+import { getInitialAmount } from '../data/storage';
 
 dayjs.extend(isBetween);
 
@@ -68,7 +69,7 @@ const BudgetComparison = () => {
       if (!startDate || !endDate) return;
 
       const days: { [key: string]: ChartData } = {};
-      const initialAmount = Number(localStorage.getItem('initialAmount')) || 0;
+      const initialAmount = Number(getInitialAmount());
 
       // Создаем массив всех дней в выбранном периоде
       const allDays = new Set<string>();
@@ -309,7 +310,7 @@ const BudgetComparison = () => {
             }}
           >
             <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 2 }}>
-              Начальная сумма: {(Number(localStorage.getItem('initialAmount')) || 0).toLocaleString()}
+              Начальная сумма: {(Number(getInitialAmount()) || 0).toLocaleString()}
             </Typography>
             <Grid container spacing={2}>
               <Grid item xs={12} sm={6}>

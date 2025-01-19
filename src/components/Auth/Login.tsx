@@ -10,6 +10,7 @@ import {
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import { checkCredentials, setAuthenticated } from '../../data/auth';
+import { setCurrentUser } from '../../data/storage';
 
 const Login = () => {
   const [formData, setFormData] = useState({
@@ -31,7 +32,8 @@ const Login = () => {
 
     if (checkCredentials(formData.login, formData.password)) {
       setAuthenticated(true);
-      navigate('/profile');
+      setCurrentUser({ login: formData.login });
+      navigate('/initial');
     } else {
       setError('Неверный логин или пароль');
     }
