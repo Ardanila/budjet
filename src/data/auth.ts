@@ -1,15 +1,16 @@
-export const login = (username: string, password: string): boolean => {
-  return username === process.env.ADMIN_LOGIN && password === process.env.ADMIN_PASSWORD;
+export const checkCredentials = (login: string, password: string): boolean => {
+  return login === import.meta.env.VITE_REACT_APP_LOGIN && password === import.meta.env.VITE_REACT_APP_PASSWORD;
 };
 
 export const isAuthenticated = (): boolean => {
-  return localStorage.getItem('isAuthenticated') === 'true';
+  const sessionAuth = sessionStorage.getItem('isAuthenticated');
+  return sessionAuth === 'true';
 };
 
 export const setAuthenticated = (value: boolean): void => {
-  localStorage.setItem('isAuthenticated', value.toString());
+  sessionStorage.setItem('isAuthenticated', value.toString());
 };
 
-export const logout = (): void => {
-  localStorage.removeItem('isAuthenticated');
+export const clearAuth = (): void => {
+  sessionStorage.removeItem('isAuthenticated');
 }; 

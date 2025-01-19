@@ -9,7 +9,7 @@ import {
   useTheme,
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
-import { login, setAuthenticated } from '../../data/auth';
+import { checkCredentials, setAuthenticated } from '../../data/auth';
 
 const Login = () => {
   const [formData, setFormData] = useState({
@@ -29,7 +29,7 @@ const Login = () => {
       return;
     }
 
-    if (login(formData.login, formData.password)) {
+    if (checkCredentials(formData.login, formData.password)) {
       setAuthenticated(true);
       navigate('/profile');
     } else {
