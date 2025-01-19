@@ -13,7 +13,6 @@ import {
 
 import Navigation from './components/Navigation';
 import Login from './components/Auth/Login';
-import Register from './components/Auth/Register';
 import InitialSetup from './components/InitialSetup';
 import PlannedBudget from './components/PlannedBudget';
 import ActualBudget from './components/ActualBudget';
@@ -71,7 +70,6 @@ function App() {
             <Box sx={{ flex: 1, p: 3 }}>
               <Routes>
                 <Route path="/login" element={!user ? <Login /> : <Navigate to="/initial" replace />} />
-                <Route path="/register" element={!user ? <Register /> : <Navigate to="/initial" replace />} />
                 <Route path="/initial" element={<PrivateRoute><InitialSetup /></PrivateRoute>} />
                 <Route path="/planned" element={<PrivateRoute><PlannedBudget /></PrivateRoute>} />
                 <Route path="/actual" element={<PrivateRoute><ActualBudget /></PrivateRoute>} />

@@ -6,7 +6,6 @@ import ReceiptIcon from '@mui/icons-material/Receipt';
 import CompareIcon from '@mui/icons-material/Compare';
 import PersonIcon from '@mui/icons-material/Person';
 import LoginIcon from '@mui/icons-material/Login';
-import PersonAddIcon from '@mui/icons-material/PersonAdd';
 
 const Navigation = () => {
   const navigate = useNavigate();
@@ -95,18 +94,10 @@ const Navigation = () => {
             <Button
               startIcon={<LoginIcon />}
               onClick={() => navigate('/login')}
-              color="inherit"
-              variant={location.pathname === '/login' ? 'contained' : 'text'}
-            >
-              Войти
-            </Button>
-            <Button
-              startIcon={<PersonAddIcon />}
-              onClick={() => navigate('/register')}
               color="primary"
               variant="contained"
             >
-              Регистрация
+              Войти
             </Button>
           </Box>
         )}
