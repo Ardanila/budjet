@@ -1,90 +1,64 @@
 import { BudgetItem } from '../types/budget';
 
-const API_URL = 'http://localhost:3001/api';
+// Ключи для sessionStorage
+const STORAGE_KEYS = {
+  INITIAL_AMOUNT: 'initialAmount',
+  PLANNED_BUDGET: 'plannedBudget',
+  ACTUAL_BUDGET: 'actualBudget',
+  CURRENT_USER: 'currentUser',
+} as const;
 
-interface UserData {
-  login: string;
-  initialAmount: string;
-  plannedBudget: BudgetItem[];
-  actualBudget: BudgetItem[];
-}
+// Функции для работы с начальной суммой
+export const getInitialAmount = (): string => {
+  return sessionStorage.getItem(STORAGE_KEYS.INITIAL_AMOUNT) || '0';
+};
 
-let currentUserData: UserData | null = null;
-let currentLogin: string | null = null;
+export const setInitialAmount = (amount: string): void => {
+  sessionStorage.setItem(STORAGE_KEYS.INITIAL_AMOUNT, amount);
+};
 
-const fetchUserData = async (login: string): Promise<UserData | null> => {
+// Функции для работы с планируемым бюджетом
+export const getPlannedBudget = (): BudgetItem[] => {
   try {
-    const response = await fetch(`${API_URL}/user/${login}`);
-    if (!response.ok) {
-      return null;
-    }
-    return await response.json();
-  } catch (error) {
-    console.error('Error fetching user data:', error);
+    const items = sessionStorage.getItem(STORAGE_KEYS.PLANNED_BUDGET);
+    return items ? JSON.parse(items) : [];
+  } catch (e) {
+    console.error('Error parsing plannedBudget:', e);
+    return [];
+  }
+};
+
+export const setPlannedBudget = (items: BudgetItem[]): void => {
+  sessionStorage.setItem(STORAGE_KEYS.PLANNED_BUDGET, JSON.stringify(items));
+};
+
+// Функции для работы с фактическим бюджетом
+export const getActualBudget = (): BudgetItem[] => {
+  try {
+    const items = sessionStorage.getItem(STORAGE_KEYS.ACTUAL_BUDGET);
+    return items ? JSON.parse(items) : [];
+  } catch (e) {
+    console.error('Error parsing actualBudget:', e);
+    return [];
+  }
+};
+
+export const setActualBudget = (items: BudgetItem[]): void => {
+  sessionStorage.setItem(STORAGE_KEYS.ACTUAL_BUDGET, JSON.stringify(items));
+};
+
+// Функции для работы с данными пользователя
+export const getCurrentUser = () => {
+  try {
+    return JSON.parse(sessionStorage.getItem(STORAGE_KEYS.CURRENT_USER) || 'null');
+  } catch (e) {
+    console.error('Error parsing currentUser:', e);
     return null;
   }
 };
 
-const saveUserData = async (login: string, data: UserData): Promise<void> => {
-  try {
-    await fetch(`${API_URL}/user/${login}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(data),
-    });
-  } catch (error) {
-    console.error('Error saving user data:', error);
-  }
-};
-
-export const getCurrentUser = () => {
-  return currentLogin ? { login: currentLogin } : null;
-};
-
-export const setCurrentUser = async (user: { login: string }) => {
-  currentLogin = user.login;
-  currentUserData = await fetchUserData(user.login) || {
-    login: user.login,
-    initialAmount: '0',
-    plannedBudget: [],
-    actualBudget: [],
-  };
-  await saveUserData(user.login, currentUserData);
-};
-
-export const getInitialAmount = (): string => {
-  return currentUserData?.initialAmount || '0';
-};
-
-export const setInitialAmount = async (amount: string): Promise<void> => {
-  if (!currentLogin || !currentUserData) return;
-  
-  currentUserData.initialAmount = amount;
-  await saveUserData(currentLogin, currentUserData);
-};
-
-export const getPlannedBudget = (): BudgetItem[] => {
-  return currentUserData?.plannedBudget || [];
-};
-
-export const setPlannedBudget = async (items: BudgetItem[]): Promise<void> => {
-  if (!currentLogin || !currentUserData) return;
-  
-  currentUserData.plannedBudget = items;
-  await saveUserData(currentLogin, currentUserData);
-};
-
-export const getActualBudget = (): BudgetItem[] => {
-  return currentUserData?.actualBudget || [];
-};
-
-export const setActualBudget = async (items: BudgetItem[]): Promise<void> => {
-  if (!currentLogin || !currentUserData) return;
-  
-  currentUserData.actualBudget = items;
-  await saveUserData(currentLogin, currentUserData);
+export const setCurrentUser = (user: any): void => {
+  sessionStorage.setItem(STORAGE_KEYS.CURRENT_USER, JSON.stringify(user));
 };
 
 // Функция для очистки всех данных

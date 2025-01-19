@@ -5,11 +5,11 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "server": "ts-node server.ts",
     "build": "tsc && vite build",
     "start": "vite preview",
-    "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
-    "preview": "vite preview"
+    "lint": "eslint src --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
+    "preview": "vite preview",
+    "vercel-build": "npm run build"
   },
   "dependencies": {
     "@emotion/react": "^11.11.3",
@@ -18,6 +18,7 @@
     "@mui/material": "^5.15.6",
     "@mui/x-date-pickers": "^7.24.0",
     "@types/dotenv": "^6.1.1",
+    "@vercel/edge-config": "^1.4.0",
     "cors": "^2.8.5",
     "dayjs": "^1.11.13",
     "dotenv": "^16.4.7",

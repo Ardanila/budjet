@@ -3,13 +3,8 @@ import { CssBaseline, Box } from '@mui/material';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import { createContext, useState, useEffect } from 'react';
 import { BudgetItem, BudgetContextType } from './types/budget';
-import {
-  getPlannedBudget,
-  setPlannedBudget,
-  getActualBudget,
-  setActualBudget,
-} from './data/storage';
 import { isAuthenticated } from './data/auth';
+import { getBudgetData, setBudgetData } from './data/edgeConfig';
 
 import Navigation from './components/Navigation';
 import Login from './components/Auth/Login';
@@ -44,20 +39,39 @@ export const BudgetContext = createContext<BudgetContextType>({
 });
 
 function App() {
-  const [plannedItems, setPlannedItems] = useState<BudgetItem[]>(() => getPlannedBudget());
-  const [actualItems, setActualItems] = useState<BudgetItem[]>(() => getActualBudget());
+  const [plannedItems, setPlannedItems] = useState<BudgetItem[]>([]);
+  const [actualItems, setActualItems] = useState<BudgetItem[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
+  // Загрузка данных при старте
   useEffect(() => {
-    setPlannedBudget(plannedItems);
-  }, [plannedItems]);
+    const loadData = async () => {
+      const data = await getBudgetData();
+      setPlannedItems(data.plannedBudget);
+      setActualItems(data.actualBudget);
+      setIsLoading(false);
+    };
+    loadData();
+  }, []);
 
+  // Сохранение данных при изменении
   useEffect(() => {
-    setActualBudget(actualItems);
-  }, [actualItems]);
+    if (!isLoading) {
+      setBudgetData(plannedItems, actualItems, '0');
+    }
+  }, [plannedItems, actualItems, isLoading]);
 
   const PrivateRoute = ({ children }: { children: React.ReactNode }) => {
     return isAuthenticated() ? <>{children}</> : <Navigate to="/login" replace />;
   };
+
+  if (isLoading) {
+    return (
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+        Загрузка...
+      </Box>
+    );
+  }
 
   return (
     <ThemeProvider theme={darkTheme}>
