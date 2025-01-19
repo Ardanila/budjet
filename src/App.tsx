@@ -1,13 +1,19 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { CssBaseline, Box, Typography } from '@mui/material';
+import { CssBaseline, Box } from '@mui/material';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import { createContext, useState, useEffect } from 'react';
 import { BudgetItem, BudgetContextType } from './types/budget';
-import { isAuthenticated } from './data/auth';
-import { getBudgetData, setBudgetData } from './data/edgeConfig';
+import {
+  getPlannedBudget,
+  setPlannedBudget,
+  getActualBudget,
+  setActualBudget,
+  getCurrentUser,
+} from './data/storage';
 
 import Navigation from './components/Navigation';
 import Login from './components/Auth/Login';
+import Register from './components/Auth/Register';
 import InitialSetup from './components/InitialSetup';
 import PlannedBudget from './components/PlannedBudget';
 import ActualBudget from './components/ActualBudget';
@@ -39,63 +45,21 @@ export const BudgetContext = createContext<BudgetContextType>({
 });
 
 function App() {
-  const [plannedItems, setPlannedItems] = useState<BudgetItem[]>([]);
-  const [actualItems, setActualItems] = useState<BudgetItem[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const user = getCurrentUser();
+  const [plannedItems, setPlannedItems] = useState<BudgetItem[]>(() => getPlannedBudget());
+  const [actualItems, setActualItems] = useState<BudgetItem[]>(() => getActualBudget());
 
-  // Загрузка данных при старте
   useEffect(() => {
-    const loadData = async () => {
-      try {
-        setError(null);
-        const data = await getBudgetData();
-        setPlannedItems(data.plannedBudget);
-        setActualItems(data.actualBudget);
-      } catch (err) {
-        setError('Ошибка загрузки данных');
-        console.error('Error loading data:', err);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    loadData();
-  }, []);
+    setPlannedBudget(plannedItems);
+  }, [plannedItems]);
 
-  // Сохранение данных при изменении
   useEffect(() => {
-    if (!isLoading) {
-      const saveData = async () => {
-        try {
-          await setBudgetData(plannedItems, actualItems, '0');
-        } catch (err) {
-          console.error('Error saving data:', err);
-          // Можно добавить уведомление пользователю об ошибке сохранения
-        }
-      };
-      saveData();
-    }
-  }, [plannedItems, actualItems, isLoading]);
+    setActualBudget(actualItems);
+  }, [actualItems]);
 
   const PrivateRoute = ({ children }: { children: React.ReactNode }) => {
-    return isAuthenticated() ? <>{children}</> : <Navigate to="/login" replace />;
+    return user ? <>{children}</> : <Navigate to="/login" replace />;
   };
-
-  if (isLoading) {
-    return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
-        <Typography variant="h6">Загрузка...</Typography>
-      </Box>
-    );
-  }
-
-  if (error) {
-    return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
-        <Typography variant="h6" color="error">{error}</Typography>
-      </Box>
-    );
-  }
 
   return (
     <ThemeProvider theme={darkTheme}>
@@ -106,14 +70,15 @@ function App() {
             <Navigation />
             <Box sx={{ flex: 1, p: 3 }}>
               <Routes>
-                <Route path="/login" element={!isAuthenticated() ? <Login /> : <Navigate to="/initial" replace />} />
+                <Route path="/login" element={!user ? <Login /> : <Navigate to="/initial" replace />} />
+                <Route path="/register" element={!user ? <Register /> : <Navigate to="/initial" replace />} />
                 <Route path="/initial" element={<PrivateRoute><InitialSetup /></PrivateRoute>} />
                 <Route path="/planned" element={<PrivateRoute><PlannedBudget /></PrivateRoute>} />
                 <Route path="/actual" element={<PrivateRoute><ActualBudget /></PrivateRoute>} />
                 <Route path="/comparison" element={<PrivateRoute><BudgetComparison /></PrivateRoute>} />
                 <Route path="/shared" element={<PrivateRoute><SharedBudget /></PrivateRoute>} />
                 <Route path="/profile" element={<PrivateRoute><Profile /></PrivateRoute>} />
-                <Route path="/" element={<Navigate to={isAuthenticated() ? "/initial" : "/login"} replace />} />
+                <Route path="/" element={<Navigate to={user ? "/initial" : "/login"} replace />} />
               </Routes>
             </Box>
           </Box>

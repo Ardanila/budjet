@@ -15,7 +15,7 @@ import { useNavigate } from 'react-router-dom';
 import PersonIcon from '@mui/icons-material/Person';
 import SaveIcon from '@mui/icons-material/Save';
 import LogoutIcon from '@mui/icons-material/Logout';
-import { checkCredentials, clearAuth } from '../data/auth';
+import { login, logout } from '../data/auth';
 
 const Profile = () => {
   const [formData, setFormData] = useState({
@@ -29,7 +29,7 @@ const Profile = () => {
   const theme = useTheme();
 
   const handleLogout = () => {
-    clearAuth();
+    logout();
     navigate('/login');
   };
 
@@ -43,7 +43,7 @@ const Profile = () => {
       return;
     }
 
-    if (!checkCredentials(process.env.REACT_APP_LOGIN || '', formData.currentPassword)) {
+    if (!login(process.env.REACT_APP_LOGIN || '', formData.currentPassword)) {
       setError('Неверный текущий пароль');
       return;
     }

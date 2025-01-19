@@ -6,13 +6,13 @@ import ReceiptIcon from '@mui/icons-material/Receipt';
 import CompareIcon from '@mui/icons-material/Compare';
 import PersonIcon from '@mui/icons-material/Person';
 import LoginIcon from '@mui/icons-material/Login';
-import { isAuthenticated } from '../data/auth';
+import PersonAddIcon from '@mui/icons-material/PersonAdd';
 
 const Navigation = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const theme = useTheme();
-  const isAuth = isAuthenticated();
+  const user = JSON.parse(localStorage.getItem('currentUser') || 'null');
 
   return (
     <AppBar 
@@ -48,7 +48,7 @@ const Navigation = () => {
           Бюджет
         </Typography>
         
-        {isAuth ? (
+        {user ? (
           <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
             <Button
               startIcon={<TimelineIcon />}
@@ -95,10 +95,18 @@ const Navigation = () => {
             <Button
               startIcon={<LoginIcon />}
               onClick={() => navigate('/login')}
+              color="inherit"
+              variant={location.pathname === '/login' ? 'contained' : 'text'}
+            >
+              Войти
+            </Button>
+            <Button
+              startIcon={<PersonAddIcon />}
+              onClick={() => navigate('/register')}
               color="primary"
               variant="contained"
             >
-              Войти
+              Регистрация
             </Button>
           </Box>
         )}

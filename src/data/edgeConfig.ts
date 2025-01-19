@@ -1,55 +1,50 @@
+import { createClient } from '@vercel/edge-config';
 import { BudgetItem } from '../types/budget';
 
-const API_URL = import.meta.env.PROD ? '/api/budget' : 'http://localhost:3000/api/budget';
+const client = createClient(process.env.EDGE_CONFIG);
 
 export const getBudgetData = async () => {
   try {
-    const response = await fetch(API_URL);
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-    const data = await response.json();
-    console.log('Received data:', data); // Отладочный вывод
+    const initialAmount = await client.get('initialAmount') || '0';
+    const plannedBudget = await client.get('plannedBudget') || [];
+    const actualBudget = await client.get('actualBudget') || [];
+    
     return {
-      plannedBudget: Array.isArray(data?.plannedBudget) ? data.plannedBudget : [],
-      actualBudget: Array.isArray(data?.actualBudget) ? data.actualBudget : [],
-      initialAmount: data?.initialAmount || '0'
+      initialAmount,
+      plannedBudget,
+      actualBudget,
     };
   } catch (error) {
     console.error('Error fetching budget data:', error);
     return {
+      initialAmount: '0',
       plannedBudget: [],
       actualBudget: [],
-      initialAmount: '0'
     };
   }
 };
 
 export const setBudgetData = async (
-  plannedBudget: BudgetItem[],
-  actualBudget: BudgetItem[],
-  initialAmount: string
+  data: {
+    initialAmount?: string;
+    plannedBudget?: BudgetItem[];
+    actualBudget?: BudgetItem[];
+  }
 ) => {
   try {
-    console.log('Sending data:', { plannedBudget, actualBudget, initialAmount }); // Отладочный вывод
-    const response = await fetch(API_URL, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        plannedBudget,
-        actualBudget,
-        initialAmount
-      })
-    });
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-    const data = await response.json();
-    return data.success;
+    // Получаем текущие данные
+    const currentData = await getBudgetData();
+    
+    // Обновляем только те поля, которые были переданы
+    const updatedData = {
+      ...currentData,
+      ...data
+    };
+    
+    // Сохраняем все данные одним вызовом
+    await client.set('budgetData', updatedData);
   } catch (error) {
     console.error('Error saving budget data:', error);
-    return false;
+    throw error;
   }
 }; 
