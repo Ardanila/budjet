@@ -1,15 +1,15 @@
-import { createClient } from '@vercel/edge-config';
 import { BudgetItem } from '../types/budget';
 
-const edgeConfig = createClient(import.meta.env.VITE_EDGE_CONFIG_TOKEN);
+const API_URL = import.meta.env.PROD ? '/api/budget' : 'http://localhost:3000/api/budget';
 
 export const getBudgetData = async () => {
   try {
-    const data = await edgeConfig.get('budget');
+    const response = await fetch(API_URL);
+    const data = await response.json();
     return {
-      plannedBudget: (data as any)?.plannedBudget || [],
-      actualBudget: (data as any)?.actualBudget || [],
-      initialAmount: (data as any)?.initialAmount || '0'
+      plannedBudget: data?.plannedBudget || [],
+      actualBudget: data?.actualBudget || [],
+      initialAmount: data?.initialAmount || '0'
     };
   } catch (error) {
     console.error('Error fetching budget data:', error);
@@ -27,12 +27,19 @@ export const setBudgetData = async (
   initialAmount: string
 ) => {
   try {
-    await edgeConfig.set('budget', {
-      plannedBudget,
-      actualBudget,
-      initialAmount
+    const response = await fetch(API_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        plannedBudget,
+        actualBudget,
+        initialAmount
+      })
     });
-    return true;
+    const data = await response.json();
+    return data.success;
   } catch (error) {
     console.error('Error saving budget data:', error);
     return false;
